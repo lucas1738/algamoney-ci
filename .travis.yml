@@ -1,0 +1,23 @@
+language: java
+jdk:
+  - oraclejdk8
+before_install:
+  - sudo apt-get update
+  - cd app/
+  - echo "Let's start Maven Package!!!"
+  - mvn clean package -Dmaven.test.skip=true
+  - cd ..
+  - echo "We are in root dir"
+script:
+  - docker-compose build
+before_deploy:
+  - echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin
+deploy:
+  provider: script
+  script:
+    docker tag algamoney-api:latest $DOCKER_USERNAME/algamoney-api:$TRAVIS_JOB_ID;
+    docker push $DOCKER_USERNAME/algamoney-api;
+  on:
+    brach: develop
+notifications:
+  email: false
